@@ -20,14 +20,18 @@ function render() {
   if (manifest) {
     if (!manifest.projects.some(p => p.releases.some(r => r.files.length))) $('projects').append(element('p', t('empty')));
     for (const project of manifest.projects) {
-      const section = element('section', '', 'project'); section.append(element('h3', project.name[lang]));
+      const section = element('section', '', 'project');
       for (const release of project.releases) {
-        section.append(element('div', release.version, 'release'));
         for (const file of release.files) {
-          const row = element('div', '', 'file'); const info = element('div', '', 'file-info');
-          info.append(element('div', file.name[lang]), element('p', file.downloadName + ' · ' + new Intl.NumberFormat(lang).format(file.bytes) + ' bytes'));
+          const row = element('div', '', 'file');
+          row.append(
+            element('h3', project.name[lang], 'file-project'),
+            element('span', release.version, 'release'),
+            element('span', file.downloadName, 'file-name'),
+            element('span', new Intl.NumberFormat(lang).format(file.bytes) + ' bytes', 'file-size')
+          );
           const button = element('button', t('download')); button.type = 'button'; button.disabled = busy; button.addEventListener('click', () => download(file));
-          row.append(info, button); section.append(row);
+          row.append(button); section.append(row);
         }
       }
       $('projects').append(section);

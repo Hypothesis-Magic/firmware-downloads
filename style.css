@@ -47,12 +47,12 @@ select { width: 100%; min-height: 44px; padding: 10px 11px; border: 1px solid #d
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 24px; }
 .toolbar h2 { margin: 0; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.project { border-top: 1px solid var(--line); padding: 24px 0; }
-.release { display: flex; align-items: baseline; gap: 14px; margin: 20px 0 8px; color: var(--muted); font: .875rem ui-monospace, SFMono-Regular, Consolas, monospace; }
-.file { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 0; }
+#projects { overflow-x: auto; }
+.project { border-top: 1px solid var(--line); min-width: max-content; }
+.release { color: var(--muted); font: .875rem ui-monospace, SFMono-Regular, Consolas, monospace; }
+.file { display: grid; grid-template-columns: minmax(max-content, 1fr) max-content minmax(max-content, 1.5fr) max-content max-content; align-items: center; gap: 18px; padding: 16px 0; white-space: nowrap; }
 .file + .file { border-top: 1px solid var(--line); }
-.file-info { min-width: 0; overflow-wrap: anywhere; }
-.file-info p { margin: 3px 0 0; font-size: .875rem; }
+.file-name, .file-size { color: var(--muted); font-size: .875rem; }
 .file button { flex-shrink: 0; color: var(--accent); }
 #status { min-height: 1.6em; overflow-wrap: anywhere; font-size: .875rem; }
 #status.error { color: var(--error); }
@@ -70,7 +70,7 @@ footer { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line);
   .key-row { flex-wrap: wrap; }
   #access-key { flex-basis: 100%; }
   #unlock { width: 100%; }
-  .file { align-items: flex-start; }
+  .file { gap: 14px; }
 }
 @media (max-width: 360px) {
   main { padding-left: 14px; padding-right: 14px; }
