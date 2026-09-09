@@ -1,4 +1,5 @@
 import { importKey, decrypt, fetchBytes, validateManifest, verifyFile } from './crypto.mjs';
+import { consumeUrlKey } from './url-key.mjs';
 const $ = id => document.getElementById(id);
 const messages = {
   title:['下載','Downloads'], language:['語言','Language'], unlock:['解鎖','Unlock'], useSaved:['使用已記住的金鑰','Use saved key'], remember:['記住這把 Access Key','Remember this Access Key'], lock:['鎖定','Lock'], forget:['忘記金鑰並鎖定','Forget key and lock'], download:['下載','Download'], empty:['目前沒有可下載的韌體','No firmware is available yet.'], working:['正在解鎖…','Unlocking…'], failed:['無法解鎖，請確認金鑰、網路連線或檔案是否已發佈','Could not unlock. Check your key, connection, or publication status.'], downloadFailed:['下載失敗，或檔案完整性驗證未通過，請重新解鎖後再試','Download failed or integrity verification failed. Unlock again and retry.'], downloading:['正在下載與解密…','Downloading and decrypting…'], done:['檔案已驗證，已交給瀏覽器下載','File verified and handed to your browser for download.'], locked:['已鎖定','Locked.'], forgotten:['已移除這個瀏覽器儲存的金鑰，並鎖定','Saved key removed from this browser. Locked.'], saved:['此瀏覽器已記住金鑰','A key is saved in this browser.'], unsaved:['未在此瀏覽器記住金鑰','No key is saved in this browser.'], saveFailed:['瀏覽器不允許儲存金鑰','This browser did not allow key storage.'], removeFailed:['已鎖定，但無法移除儲存的金鑰，請清除此網站的瀏覽器資料','Locked, but the saved key could not be removed. Clear this site’s browser data.'], consent:['要將這把 Access Key 儲存在此瀏覽器嗎？使用這個瀏覽器的人，以及此 GitHub Pages 網域下的其他頁面，可能讀到金鑰，請只在你信任的私人裝置上記住','Save this Access Key in this browser? Anyone using this browser, and other pages on this GitHub Pages origin, may be able to read it. Only remember it on a trusted private device.'], unsupported:['需要支援 Web Crypto 的瀏覽器與 HTTPS','A browser with Web Crypto and HTTPS is required.']
@@ -46,10 +47,11 @@ function lock(message = 'locked') {
   status(message); render();
 }
 async function unlock(value) {
-  lock('working'); const current = generation; busy = true; render();
+  lock('working'); const current = generation, signal = controller.signal; busy = true; render();
   try {
     const candidate = await importKey(value);
-    const encrypted = await fetchBytes('./protected/manifest.enc', 1024 * 1024 + 33, controller.signal);
+    if (current !== generation) return;
+    const encrypted = await fetchBytes('./protected/manifest.enc', 1024 * 1024 + 33, signal);
     const plain = await decrypt(candidate, 'manifest', encrypted);
     let next; try { next = validateManifest(JSON.parse(new TextDecoder('utf-8', { fatal:true }).decode(plain))); } finally { new Uint8Array(plain).fill(0); }
     if (current !== generation) return;
@@ -80,4 +82,13 @@ $('language').addEventListener('change', () => { lang = $('language').value; ren
 window.addEventListener('pagehide', () => lock());
 window.addEventListener('storage', event => { if (event.key === STORAGE || event.key === null) { lock(); storageState(); } });
 render();
-if (!globalThis.isSecureContext || !globalThis.crypto?.subtle) { busy = true; status('unsupported', true); render(); }
+const supported = globalThis.isSecureContext && !!globalThis.crypto?.subtle;
+function unlockFromUrl() {
+  try {
+    const value = consumeUrlKey(location, window.history);
+    if (value && supported) void unlock(value);
+  } catch { if (supported) { lock(); status('failed', true); } }
+}
+if (!supported) { busy = true; status('unsupported', true); render(); }
+window.addEventListener('hashchange', unlockFromUrl);
+unlockFromUrl();

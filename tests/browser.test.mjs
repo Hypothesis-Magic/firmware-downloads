@@ -33,11 +33,14 @@ test('UI only fetches manifest on unlock, obtains storage consent, supports lock
   globalThis.document={documentElement:{},body:new Element('body'),getElementById(id){if(!elements.has(id))elements.set(id,new Element());return elements.get(id);},querySelectorAll(){return[];},createElement(tag){return new Element(tag);}};
   globalThis.window={confirm:()=>consent,addEventListener:(name,fn)=>windows.set(name,fn)};
   globalThis.location=new URL('https://hypothesis-magic.github.io/firmware-downloads/');
+  window.history={state:null,replaceState(state,title,url){globalThis.location=new URL(url,location.href);}};
   Object.defineProperty(globalThis,'navigator',{value:{language:'en'},configurable:true});globalThis.isSecureContext=true;
   globalThis.localStorage={getItem:k=>storage.get(k)||null,setItem(k,v){writes++;storage.set(k,v);},removeItem:k=>storage.delete(k)};
   const originalFetch=globalThis.fetch,originalTimeout=globalThis.setTimeout;
   globalThis.setTimeout=(fn,ms)=>{const timer=originalTimeout(fn,ms);timer.unref();return timer;};
   globalThis.fetch=async path=>{
+    assert(!location.hash.includes('key='));
+    assert(!String(path).includes(accessKey));
     requests.push(path);
     if(path.endsWith('manifest.enc'))return new Response(encrypt('manifest',Buffer.from(JSON.stringify(catalog))));
     if(holdBlob)await new Promise(resolve=>{releaseBlob=resolve;});
@@ -59,6 +62,16 @@ test('UI only fetches manifest on unlock, obtains storage consent, supports lock
     tampered=false;holdBlob=true;const pending=findButton(get('projects')).click();get('lock').click();releaseBlob();await pending;assert.equal(downloads,1);assert(get('unlocked').hidden);
     get('forget').click();assert.equal(storage.size,0);assert(get('unlocked').hidden);
     get('language').value='zh-TW';get('language').listeners.change();assert.equal(document.documentElement.lang,'zh-TW');
+    // Initial link unlocks without saving the key or fetching firmware
+    const previousWrites=writes;requests=[];holdBlob=false;
+    location.hash='key='+encodeURIComponent(accessKey);
+    await import('../app.mjs?url-key-startup');await wait();
+    assert.equal(location.hash,'');assert(!get('unlocked').hidden);assert.equal(writes,previousWrites);assert.equal(storage.size,0);
+    assert.deepEqual(requests,['./protected/manifest.enc']);
+    get('lock').click();windows.get('hashchange')();assert(get('unlocked').hidden);
+    location.hash='key=bad';requests=[];windows.get('hashchange')();assert.equal(location.hash,'');assert(get('unlocked').hidden);assert.equal(requests.length,0);
+    location.hash='key=HMF1-'+randomBytes(32).toString('base64url');windows.get('hashchange')();await wait();assert.equal(location.hash,'');assert(get('unlocked').hidden);
+    location.hash='key='+accessKey;windows.get('hashchange')();await wait();assert(!get('unlocked').hidden);assert.equal(storage.size,0);
   } finally {globalThis.fetch=originalFetch;globalThis.setTimeout=originalTimeout;}
 });
 test('bounded fetch rejects oversized payloads and HTTP errors',async()=>{

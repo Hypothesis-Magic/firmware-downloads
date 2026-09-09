@@ -4,7 +4,7 @@ import { join } from 'node:path';
 // Explicit Pages artifact allowlist: no repository metadata, tests, docs or arbitrary extensions.
 const output = process.argv[2] || '_site';
 await mkdir(output, {recursive:false});
-for (const name of ['index.html','app.mjs','crypto.mjs','style.css','.nojekyll']) await copyFile(name,join(output,name));
+for (const name of ['index.html','app.mjs','crypto.mjs','url-key.mjs','style.css','.nojekyll']) await copyFile(name,join(output,name));
 await mkdir(join(output,'protected'));
 const names=await readdir('protected');
 if(!names.includes('manifest.enc')) throw new Error('Missing encrypted manifest');
