@@ -24,7 +24,6 @@ h1 small { color: var(--muted); font-size: .875rem; font-weight: 400; letter-spa
 h2 { margin: 0 0 18px; font-size: 1rem; font-weight: 600; }
 h3 { margin: 0; font-size: 1rem; font-weight: 600; }
 p { color: var(--muted); margin: 12px 0; }
-.step { display: inline-block; margin-right: 8px; color: var(--muted); font: .875rem ui-monospace, SFMono-Regular, Consolas, monospace; }
 .small { font-size: .875rem; }
 
 button, input, select { font: inherit; color: inherit; }
@@ -45,7 +44,6 @@ select { width: 100%; min-height: 44px; padding: 10px 11px; border: 1px solid #d
 #use-saved, #lock, #forget { color: var(--muted); }
 
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 24px; }
-.toolbar h2 { margin: 0; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 #projects { overflow-x: auto; }
 .project { border-top: 1px solid var(--line); min-width: max-content; }
