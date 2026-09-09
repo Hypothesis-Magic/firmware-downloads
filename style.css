@@ -60,13 +60,26 @@ footer { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line);
   main { padding: 22px 20px 24px; }
   .toolbar { gap: 16px; }
   .toolbar .actions { width: 100%; }
+  #projects { overflow-x: visible; }
+  .project { min-width: 0; }
+  .file {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "project version" "name name" "size download";
+    gap: 8px 14px;
+    white-space: normal;
+  }
+  .file > * { min-width: 0; overflow-wrap: anywhere; }
+  .file-project { grid-area: project; }
+  .file .release { grid-area: version; max-width: 10ch; text-align: right; }
+  .file-name { grid-area: name; }
+  .file-size { grid-area: size; }
+  .file button { grid-area: download; justify-self: end; }
   footer { margin-top: 24px; }
 }
 @media (max-width: 540px) {
   .key-row { flex-wrap: wrap; }
   #access-key { flex-basis: 100%; }
   #unlock { width: 100%; }
-  .file { gap: 14px; }
 }
 @media (max-width: 360px) {
   main { padding-left: 14px; padding-right: 14px; }
