@@ -39,11 +39,9 @@ select { width: 100%; min-height: 44px; padding: 10px 11px; border: 1px solid #d
 .file-label { display: block; margin-bottom: 8px; font-size: .875rem; font-weight: 550; }
 
 #locked { max-width: 640px; }
-#locked > p { font-size: .875rem; line-height: 1.75; }
-#locked > h2 + p { margin-bottom: 20px; }
 .key-row { display: flex; gap: 8px; }
 #access-key { flex: 1; min-width: 0; min-height: 44px; padding: 10px 11px; border: 1px solid #d8dfda; border-radius: 6px; background: white; font: .9375rem ui-monospace, SFMono-Regular, Consolas, monospace; }
-#key-note { margin-bottom: 20px; }
+#use-saved { margin-top: 18px; }
 #use-saved, #lock, #forget { color: var(--muted); }
 
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 24px; }
