@@ -29,8 +29,7 @@ function render() {
           const row = element('li', '', 'file');
           row.append(
             element('span', release.version, 'release'),
-            element('span', file.downloadName, 'file-name'),
-            element('span', new Intl.NumberFormat(lang).format(file.bytes) + ' bytes', 'file-size')
+            element('span', file.downloadName, 'file-name')
           );
           const button = element('button', t('download')); button.type = 'button'; button.disabled = busy; button.addEventListener('click', () => download(file));
           row.append(button); list.append(row);

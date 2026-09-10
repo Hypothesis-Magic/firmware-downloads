@@ -49,10 +49,10 @@ select { width: 100%; min-height: 44px; padding: 10px 11px; border: 1px solid #d
 .project-title { margin-bottom: 10px; overflow-wrap: anywhere; }
 .project-files { list-style: none; margin: 0 0 0 8px; padding: 0 0 0 16px; border-left: 2px solid var(--line); }
 .release { color: var(--muted); font: .875rem ui-monospace, SFMono-Regular, Consolas, monospace; }
-.file { display: grid; grid-template-columns: minmax(0, .3fr) minmax(0, 1.5fr) max-content max-content; align-items: center; gap: 18px; padding: 10px 0; }
+.file { display: grid; grid-template-columns: minmax(0, .3fr) minmax(0, 1.5fr) max-content; align-items: center; gap: 18px; padding: 10px 0; }
 .file > * { min-width: 0; overflow-wrap: anywhere; }
 .file + .file { border-top: 1px solid var(--line); }
-.file-name, .file-size { color: var(--muted); font-size: .875rem; }
+.file-name { color: var(--muted); font-size: .875rem; }
 .file button { flex-shrink: 0; color: var(--accent); }
 #status { min-height: 1.6em; overflow-wrap: anywhere; font-size: .875rem; }
 #status.error { color: var(--error); }
@@ -67,13 +67,12 @@ footer { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line);
   .project { min-width: 0; }
   .file {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "version version" "name name" "size download";
+    grid-template-areas: "version download" "name name";
     gap: 8px 14px;
     white-space: normal;
   }
   .file .release { grid-area: version; }
   .file-name { grid-area: name; }
-  .file-size { grid-area: size; }
   .file button { grid-area: download; justify-self: end; }
   footer { margin-top: 24px; }
 }
