@@ -44,10 +44,13 @@ select { width: 100%; min-height: 44px; padding: 10px 11px; border: 1px solid #d
 
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 24px; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
-#projects { overflow-x: auto; }
-.project { border-top: 1px solid var(--line); min-width: max-content; }
+#projects { min-width: 0; }
+.project { border-top: 1px solid var(--line); min-width: 0; padding: 18px 0; }
+.project-title { margin-bottom: 10px; overflow-wrap: anywhere; }
+.project-files { list-style: none; margin: 0 0 0 8px; padding: 0 0 0 16px; border-left: 2px solid var(--line); }
 .release { color: var(--muted); font: .875rem ui-monospace, SFMono-Regular, Consolas, monospace; }
-.file { display: grid; grid-template-columns: minmax(max-content, 1fr) max-content minmax(max-content, 1.5fr) max-content max-content; align-items: center; gap: 18px; padding: 16px 0; white-space: nowrap; }
+.file { display: grid; grid-template-columns: minmax(0, .3fr) minmax(0, 1.5fr) max-content max-content; align-items: center; gap: 18px; padding: 10px 0; }
+.file > * { min-width: 0; overflow-wrap: anywhere; }
 .file + .file { border-top: 1px solid var(--line); }
 .file-name, .file-size { color: var(--muted); font-size: .875rem; }
 .file button { flex-shrink: 0; color: var(--accent); }
@@ -64,13 +67,11 @@ footer { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line);
   .project { min-width: 0; }
   .file {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "project version" "name name" "size download";
+    grid-template-areas: "version version" "name name" "size download";
     gap: 8px 14px;
     white-space: normal;
   }
-  .file > * { min-width: 0; overflow-wrap: anywhere; }
-  .file-project { grid-area: project; }
-  .file .release { grid-area: version; max-width: 10ch; text-align: right; }
+  .file .release { grid-area: version; }
   .file-name { grid-area: name; }
   .file-size { grid-area: size; }
   .file button { grid-area: download; justify-self: end; }
