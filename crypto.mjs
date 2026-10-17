@@ -53,6 +53,10 @@ export function validateManifest(manifest) {
     label(project.name); check(Array.isArray(project.releases));
     for (const release of project.releases) {
       check(typeof release.version === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$/.test(release.version));
+      if (release.uploadedAt !== undefined) {
+        check(typeof release.uploadedAt === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(release.uploadedAt));
+        check(Number.isFinite(Date.parse(release.uploadedAt)) && new Date(release.uploadedAt).toISOString() === release.uploadedAt);
+      }
       check(Array.isArray(release.files));
       for (const file of release.files) {
         check(/^[a-f0-9]{64}$/.test(file.id) && !ids.has(file.id)); ids.add(file.id);

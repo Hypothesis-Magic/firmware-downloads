@@ -53,6 +53,9 @@ select { width: 100%; min-height: 44px; padding: 10px 11px; border: 1px solid #d
 .file > * { min-width: 0; overflow-wrap: anywhere; }
 .file + .file { border-top: 1px solid var(--line); }
 .file-name { color: var(--muted); font-size: .875rem; }
+.uploaded-at { grid-column: 2; color: var(--muted); font-size: .8125rem; }
+.uploaded-at time { display: inline-block; }
+.file button { grid-column: 3; grid-row: 1 / span 2; }
 .file button { flex-shrink: 0; color: var(--accent); }
 #status { min-height: 1.6em; overflow-wrap: anywhere; font-size: .875rem; }
 #status.error { color: var(--error); }
@@ -67,12 +70,13 @@ footer { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line);
   .project { min-width: 0; }
   .file {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "version download" "name name";
+    grid-template-areas: "version download" "name name" "uploaded uploaded";
     gap: 8px 14px;
     white-space: normal;
   }
   .file .release { grid-area: version; }
   .file-name { grid-area: name; }
+  .uploaded-at { grid-area: uploaded; }
   .file button { grid-area: download; justify-self: end; }
   footer { margin-top: 24px; }
 }

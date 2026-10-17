@@ -5,7 +5,7 @@ import { importKey, decrypt, validateManifest, verifyFile, fetchBytes } from '..
 
 const raw=randomBytes(32), accessKey='HMF1-'+raw.toString('base64url');
 const file={id:'a'.repeat(64),name:{en:'Test firmware','zh-TW':'測試韌體'},downloadName:'test.hex',bytes:4,sha256:createHash('sha256').update('test').digest('hex')};
-const catalog={version:1,projects:[{id:'test',name:{en:'Test project','zh-TW':'測試專案'},releases:[{version:'1.0',files:[file]}]}]};
+const catalog={version:1,projects:[{id:'test',name:{en:'Test project','zh-TW':'測試專案'},releases:[{version:'1.0',uploadedAt:'2026-09-10T23:15:30.000Z',files:[file]}]}]};
 function encrypt(context,plain) {
   const magic=Buffer.from([72,77,70,87,1]),iv=randomBytes(12),domain='Hypothesis-Magic/firmware/v1/';
   const key=Buffer.from(hkdfSync('sha256',raw,Buffer.from(domain),Buffer.from(context),32));
@@ -18,6 +18,10 @@ test('browser crypto decrypts publisher format and rejects tampering, substituti
   await assert.rejects(decrypt(key,'blob/'+file.id,bytes)); bytes[bytes.length-1]^=1; await assert.rejects(decrypt(key,'manifest',bytes));
   const unsafe=structuredClone(catalog);unsafe.projects[0].releases[0].files[0].id='../secret';assert.throws(()=>validateManifest(unsafe));
   await verifyFile(file,Buffer.from('test'));await assert.rejects(verifyFile(file,Buffer.from('bad!')));
+  const legacy=structuredClone(catalog);delete legacy.projects[0].releases[0].uploadedAt;assert.doesNotThrow(()=>validateManifest(legacy));
+  for(const invalid of ['yesterday','2026-02-30T00:00:00.000Z','2026-09-10',null,123]) {
+    const bad=structuredClone(catalog);bad.projects[0].releases[0].uploadedAt=invalid;assert.throws(()=>validateManifest(bad));
+  }
 });
 test('UI only fetches manifest on unlock, obtains storage consent, supports lock/forget and lazy verified downloads',async()=>{
   const elements=new Map(),windows=new Map();let downloads=0,writes=0,consent=false,requests=[],tampered=false,holdBlob=false,releaseBlob;
@@ -50,10 +54,17 @@ test('UI only fetches manifest on unlock, obtains storage consent, supports lock
   const wait=async()=>{for(let i=0;i<1000;i++){if(!get('unlock').disabled)return;await new Promise(r=>originalTimeout(r,2));}throw new Error('UI did not settle');};
   const enter=async key=>{get('access-key').value=key;get('unlock-form').listeners.submit({preventDefault(){}});await wait();};
   const findButton=node=>node.tag==='button'?node:node.children.map(findButton).find(Boolean);
+  const findUpload=node=>node.className==='uploaded-at'?node:node.children.map(findUpload).find(Boolean);
   try {
     await import('../app.mjs');assert.equal(requests.length,0);assert.equal(writes,0);
     await enter('HMF1-'+randomBytes(32).toString('base64url'));assert(get('unlocked').hidden);assert.equal(writes,0);assert.equal(get('projects').children.length,0);
     requests=[];await enter(accessKey);assert(!get('unlocked').hidden);assert.deepEqual(requests,['./protected/manifest.enc']);assert.equal(get('access-key').value,'');assert.equal(writes,0);
+    assert.equal(findUpload(get('projects')).children[0].textContent,'Uploaded：');
+    assert.equal(findUpload(get('projects')).children[1].textContent,'2026-09-11 07:15:30 (UTC+8)');
+    assert.equal(findUpload(get('projects')).children[1].dateTime,'2026-09-10T23:15:30.000Z');
+    get('language').value='zh-TW';get('language').listeners.change();
+    assert.equal(findUpload(get('projects')).children[0].textContent,'上傳時間：');
+    get('language').value='en';get('language').listeners.change();
     get('remember').click();assert.equal(writes,0);consent=true;get('remember').click();assert.equal(writes,1);assert.equal(storage.size,1);
     get('lock').click();assert(get('unlocked').hidden);assert.equal(get('projects').children.length,0);assert.equal(storage.size,1);
     get('use-saved').click();await wait();assert(!get('unlocked').hidden);
@@ -72,6 +83,9 @@ test('UI only fetches manifest on unlock, obtains storage consent, supports lock
     location.hash='key=bad';requests=[];windows.get('hashchange')();assert.equal(location.hash,'');assert(get('unlocked').hidden);assert.equal(requests.length,0);
     location.hash='key=HMF1-'+randomBytes(32).toString('base64url');windows.get('hashchange')();await wait();assert.equal(location.hash,'');assert(get('unlocked').hidden);
     location.hash='key='+accessKey;windows.get('hashchange')();await wait();assert(!get('unlocked').hidden);assert.equal(storage.size,0);
+    delete catalog.projects[0].releases[0].uploadedAt;
+    await enter(accessKey);assert(!get('unlocked').hidden);
+    assert.equal(findUpload(get('projects')).children[1].textContent,'Not recorded');
   } finally {globalThis.fetch=originalFetch;globalThis.setTimeout=originalTimeout;}
 });
 test('bounded fetch rejects oversized payloads and HTTP errors',async()=>{

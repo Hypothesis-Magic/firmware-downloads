@@ -2,6 +2,7 @@ import { importKey, decrypt, fetchBytes, validateManifest, verifyFile } from './
 import { consumeUrlKey } from './url-key.mjs';
 const $ = id => document.getElementById(id);
 const messages = {
+  uploaded:['上傳時間','Uploaded'], unknownTime:['尚無紀錄','Not recorded'],
   title:['下載','Downloads'], language:['語言','Language'], unlock:['解鎖','Unlock'], useSaved:['使用已記住的金鑰','Use saved key'], remember:['記住這把 Access Key','Remember this Access Key'], lock:['鎖定','Lock'], forget:['忘記金鑰並鎖定','Forget key and lock'], download:['下載','Download'], empty:['目前沒有可下載的韌體','No firmware is available yet.'], working:['正在解鎖…','Unlocking…'], failed:['無法解鎖，請確認金鑰、網路連線或檔案是否已發佈','Could not unlock. Check your key, connection, or publication status.'], downloadFailed:['下載失敗，或檔案完整性驗證未通過，請重新解鎖後再試','Download failed or integrity verification failed. Unlock again and retry.'], downloading:['正在下載與解密…','Downloading and decrypting…'], done:['檔案已驗證，已交給瀏覽器下載','File verified and handed to your browser for download.'], locked:['已鎖定','Locked.'], forgotten:['已移除這個瀏覽器儲存的金鑰，並鎖定','Saved key removed from this browser. Locked.'], saved:['此瀏覽器已記住金鑰','A key is saved in this browser.'], unsaved:['未在此瀏覽器記住金鑰','No key is saved in this browser.'], saveFailed:['瀏覽器不允許儲存金鑰','This browser did not allow key storage.'], removeFailed:['已鎖定，但無法移除儲存的金鑰，請清除此網站的瀏覽器資料','Locked, but the saved key could not be removed. Clear this site’s browser data.'], consent:['要將這把 Access Key 儲存在此瀏覽器嗎？使用這個瀏覽器的人，以及此 GitHub Pages 網域下的其他頁面，可能讀到金鑰，請只在你信任的私人裝置上記住','Save this Access Key in this browser? Anyone using this browser, and other pages on this GitHub Pages origin, may be able to read it. Only remember it on a trusted private device.'], unsupported:['需要支援 Web Crypto 的瀏覽器與 HTTPS','A browser with Web Crypto and HTTPS is required.']
 };
 let lang = navigator.language.startsWith('zh') ? 'zh-TW' : 'en';
@@ -31,6 +32,15 @@ function render() {
             element('span', release.version, 'release'),
             element('span', file.downloadName, 'file-name')
           );
+          const uploaded = element('span', '', 'uploaded-at');
+          uploaded.append(element('span', t('uploaded') + '：'));
+          if (release.uploadedAt) {
+            const date = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date(release.uploadedAt));
+            const time = element('time', date + ' (UTC+8)');
+            time.dateTime = release.uploadedAt;
+            uploaded.append(time);
+          } else uploaded.append(element('span', t('unknownTime')));
+          row.append(uploaded);
           const button = element('button', t('download')); button.type = 'button'; button.disabled = busy; button.addEventListener('click', () => download(file));
           row.append(button); list.append(row);
         }
